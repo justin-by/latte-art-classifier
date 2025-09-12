@@ -13,11 +13,16 @@ class TransferLearningLatteArtClassifier:
         self.img_size = img_size
         self.class_names = ['heart', 'tulip', 'swan', 'rosetta']
         self.model = None
-        # Try to load the model, but don't fail if it doesn't exist
+        # Try to load the trained model first, then fallback to simple model
         try:
-            self.load_model('transfer_latte_art_model.h5')
+            self.load_model('kaggle_latte_art_model.h5')
+            print("✅ Loaded trained Kaggle model")
         except:
-            print("⚠️  Model file not found, will use fallback predictions")
+            try:
+                self.load_model('transfer_latte_art_model.h5')
+                print("✅ Loaded transfer learning model")
+            except:
+                print("⚠️  No trained model found, will use simple model")
     
     def create_transfer_model(self):
         """Create a model using transfer learning with MobileNetV2"""
