@@ -12,27 +12,8 @@ import json
 from transfer_learning_model import TransferLearningLatteArtClassifier
 
 # Create Flask app
-# Try multiple possible locations for the frontend build directory
-possible_paths = [
-    os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'build')),  # Local development
-    os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'build')),  # Heroku build
-    os.path.abspath('frontend/build'),  # Alternative path
-    os.path.abspath('build'),  # Direct build path
-]
-
-static_folder = None
-for path in possible_paths:
-    print(f"🔍 Checking path: {path}")
-    if os.path.exists(path):
-        print(f"✅ Found static folder at: {path}")
-        print(f"🔍 Contents: {os.listdir(path)}")
-        static_folder = path
-        break
-
-if static_folder is None:
-    print("❌ No static folder found!")
-    static_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'build'))
-
+# Configure static folder for React frontend
+static_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'build'))
 app = Flask(__name__, static_folder=static_folder, static_url_path='')
 CORS(app)
 
@@ -124,46 +105,14 @@ def status_check():
         'message': 'Server is running' + (' with model loaded' if model_loaded else ' (model will load on first request)')
     })
 
-@app.route('/api/debug', methods=['GET'])
-def debug_info():
-    """Debug endpoint to check file structure"""
-    import os
-    current_dir = os.getcwd()
-    parent_dir = os.path.dirname(current_dir)
-    frontend_dir = os.path.join(current_dir, 'frontend')
-    
-    debug_info = {
-        'current_dir': current_dir,
-        'parent_dir': parent_dir,
-        'frontend_dir': frontend_dir,
-        'frontend_dir_exists': os.path.exists(frontend_dir),
-        'static_folder': app.static_folder,
-        'static_folder_exists': os.path.exists(app.static_folder) if app.static_folder else False,
-        'current_dir_contents': os.listdir(current_dir) if os.path.exists(current_dir) else [],
-        'parent_dir_contents': os.listdir(parent_dir) if os.path.exists(parent_dir) else [],
-    }
-    
-    if os.path.exists(frontend_dir):
-        debug_info['frontend_dir_contents'] = os.listdir(frontend_dir)
-    
-    if app.static_folder and os.path.exists(app.static_folder):
-        debug_info['static_folder_contents'] = os.listdir(app.static_folder)
-    
-    return jsonify(debug_info)
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve_react_app(path):
     """Serve the React app for all non-API routes"""
-    print(f"🔍 Serving path: '{path}'")
-    print(f"🔍 Static folder: {app.static_folder}")
-    print(f"🔍 Static folder exists: {os.path.exists(app.static_folder)}")
-    
     if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
-        print(f"🔍 Serving file: {path}")
         return send_from_directory(app.static_folder, path)
     else:
-        print(f"🔍 Serving index.html")
         return send_from_directory(app.static_folder, 'index.html')
 
 if __name__ == '__main__':
