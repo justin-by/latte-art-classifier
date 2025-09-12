@@ -130,15 +130,21 @@ def debug_info():
     import os
     current_dir = os.getcwd()
     parent_dir = os.path.dirname(current_dir)
+    frontend_dir = os.path.join(current_dir, 'frontend')
     
     debug_info = {
         'current_dir': current_dir,
         'parent_dir': parent_dir,
+        'frontend_dir': frontend_dir,
+        'frontend_dir_exists': os.path.exists(frontend_dir),
         'static_folder': app.static_folder,
         'static_folder_exists': os.path.exists(app.static_folder) if app.static_folder else False,
         'current_dir_contents': os.listdir(current_dir) if os.path.exists(current_dir) else [],
         'parent_dir_contents': os.listdir(parent_dir) if os.path.exists(parent_dir) else [],
     }
+    
+    if os.path.exists(frontend_dir):
+        debug_info['frontend_dir_contents'] = os.listdir(frontend_dir)
     
     if app.static_folder and os.path.exists(app.static_folder):
         debug_info['static_folder_contents'] = os.listdir(app.static_folder)
