@@ -1,0 +1,108 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import os
+import cv2
+import numpy as np
+from PIL import Image
+import io
+import base64
+import tensorflow as tf
+from werkzeug.utils import secure_filename
+import json
+from transfer_learning_model import TransferLearningLatteArtClassifier
+
+app = Flask(__name__)
+CORS(app)
+
+# Configuration
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Create uploads directory if it doesn't exist
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+# Initialize classifier (load model lazily)
+classifier = None
+
+def get_classifier():
+    """Get or initialize the classifier"""
+    global classifier
+    if classifier is None:
+        try:
+            print("🔄 Initializing classifier...")
+            # Create classifier without loading default model
+            classifier = TransferLearningLatteArtClassifier()
+            # Override the default model loading
+            classifier.model = None
+            print("🔄 Loading Kaggle model file...")
+            classifier.load_model('kaggle_latte_art_model.h5')
+            print(f"✅ Model loaded with classes: {classifier.class_names}")
+        except Exception as e:
+            print(f"❌ Error loading model: {e}")
+            classifier = None
+    return classifier
+
+@app.route('/api/classify', methods=['POST'])
+def classify_latte_art():
+    """Endpoint to classify and grade latte art"""
+    try:
+        if 'image' not in request.files:
+            return jsonify({'error': 'No image file provided'}), 400
+        
+        file = request.files['image']
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+        
+        if file and allowed_file(file.filename):
+            # Read and process the image
+            file_bytes = file.read()
+            nparr = np.frombuffer(file_bytes, np.uint8)
+            image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            
+            if image is None:
+                return jsonify({'error': 'Invalid image file'}), 400
+            
+            # Classify the latte art
+            classifier = get_classifier()
+            art_type, confidence = classifier.predict(image)
+            
+            # Prepare response
+            response = {
+                'art_type': art_type,
+                'confidence': confidence
+            }
+            
+            return jsonify(response)
+        
+        return jsonify({'error': 'Invalid file type'}), 400
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    """Health check endpoint"""
+    return jsonify({'status': 'healthy', 'message': 'Latte Art Classifier is running'})
+
+@app.route('/api/status', methods=['GET'])
+def status_check():
+    """Status check endpoint"""
+    global classifier
+    model_loaded = classifier is not None
+    return jsonify({
+        'status': 'running',
+        'model_loaded': model_loaded,
+        'message': 'Server is running' + (' with model loaded' if model_loaded else ' (model will load on first request)')
+    })
+
+if __name__ == '__main__':
+    # Use Heroku's PORT environment variable or default to 5001 for local development
+    port = int(os.environ.get('PORT', 5001))
+    app.run(debug=False, host='0.0.0.0', port=port)

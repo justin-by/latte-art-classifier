@@ -1,0 +1,28 @@
+{
+  "name": "latte-art-classifier",
+  "version": "1.0.0",
+  "description": "A beautiful web application that analyzes and grades latte art using computer vision and machine learning",
+  "main": "index.js",
+  "scripts": {
+    "start": "./start.sh",
+    "backend": "cd backend && python app.py",
+    "frontend": "cd frontend && npm start",
+    "install-deps": "cd backend && pip install -r requirements.txt && cd ../frontend && npm install",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\""
+  },
+  "keywords": [
+    "latte-art",
+    "coffee",
+    "computer-vision",
+    "machine-learning",
+    "react",
+    "flask",
+    "opencv",
+    "tensorflow"
+  ],
+  "author": "Latte Art Classifier Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  }
+}
