@@ -81,11 +81,17 @@ def classify_latte_art():
             
             # Classify the latte art
             classifier = get_classifier()
-            art_type, confidence = classifier.predict(image)
+            if classifier is None:
+                return jsonify({'error': 'Classifier not available'}), 500
             
-            # Prepare response
+            print(f"🔍 Classifying image with model: {type(classifier.model)}")
+            art_type, confidence = classifier.predict(image)
+            print(f"🎯 Prediction: {art_type} with {confidence:.2f} confidence")
+            
+            # Prepare response (compatible with both frontends)
             response = {
                 'art_type': art_type,
+                'predicted_class': art_type,  # For React frontend compatibility
                 'confidence': confidence
             }
             
