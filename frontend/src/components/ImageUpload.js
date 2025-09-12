@@ -47,7 +47,12 @@ const ImageUpload = ({ onAnalysisStart, onAnalysisComplete, onAnalysisError, loa
 
     try {
       // Send image to Flask backend for AI classification
-      const response = await axios.post('http://localhost:5001/api/classify', formData, {
+      // Use relative URL for production, localhost for development
+      const apiUrl = process.env.NODE_ENV === 'production' 
+        ? '/api/classify' 
+        : 'http://localhost:5001/api/classify';
+      
+      const response = await axios.post(apiUrl, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

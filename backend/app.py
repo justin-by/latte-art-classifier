@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import os
 import cv2
@@ -11,7 +11,8 @@ from werkzeug.utils import secure_filename
 import json
 from transfer_learning_model import TransferLearningLatteArtClassifier
 
-app = Flask(__name__)
+# Create Flask app
+app = Flask(__name__, static_folder='../frontend/build', static_url_path='')
 CORS(app)
 
 # Configuration
@@ -101,6 +102,15 @@ def status_check():
         'model_loaded': model_loaded,
         'message': 'Server is running' + (' with model loaded' if model_loaded else ' (model will load on first request)')
     })
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve_react_app(path):
+    """Serve the React app for all non-API routes"""
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, 'index.html')
 
 if __name__ == '__main__':
     # Use Heroku's PORT environment variable or default to 5001 for local development
