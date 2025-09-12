@@ -1,8 +1,9 @@
-# Git
 .git
 .gitignore
-
-# Python
+README.md
+RENDER_DEPLOYMENT.md
+frontend/node_modules
+frontend/build
 __pycache__
 *.pyc
 *.pyo
@@ -19,33 +20,9 @@ nosetests.xml
 coverage.xml
 *.cover
 *.log
-.venv
-venv/
-
-# Node
-node_modules
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# IDE
+.DS_Store
 .vscode
 .idea
 *.swp
 *.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Project specific
-uploads/
-*.log
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Keep model files for deployment
-!backend/*.h5
+*~
