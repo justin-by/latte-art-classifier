@@ -67,9 +67,22 @@ def get_classifier():
     if classifier is None:
         try:
             print("🔄 Initializing classifier...")
+            print("🔍 Current working directory:", os.getcwd())
+            print("🔍 Backend directory:", os.path.dirname(__file__))
+            
+            # List files in backend directory
+            backend_dir = os.path.dirname(__file__)
+            if os.path.exists(backend_dir):
+                print("🔍 Backend directory contents:", os.listdir(backend_dir))
+            
             # Create classifier (will use trained model for Render)
             classifier = TransferLearningLatteArtClassifier()
             print(f"✅ Classifier initialized with classes: {classifier.class_names}")
+            print(f"🔍 Model loaded: {classifier.model is not None}")
+            if classifier.model is not None:
+                print(f"🔍 Model type: {type(classifier.model)}")
+            else:
+                print("❌ No model loaded!")
         except Exception as e:
             print(f"❌ Error initializing classifier: {e}")
             import traceback
@@ -124,7 +137,17 @@ def classify_latte_art():
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
-    return jsonify({'status': 'healthy', 'message': 'Latte Art Classifier is running'})
+    classifier = get_classifier()
+    model_status = "loaded" if classifier and classifier.model is not None else "not loaded"
+    model_type = str(type(classifier.model)) if classifier and classifier.model else "none"
+    
+    return jsonify({
+        'status': 'healthy', 
+        'message': 'Latte Art Classifier is running',
+        'model_status': model_status,
+        'model_type': model_type,
+        'classes': classifier.class_names if classifier else []
+    })
 
 @app.route('/api/status', methods=['GET'])
 def status_check():
