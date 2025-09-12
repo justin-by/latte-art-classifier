@@ -14,6 +14,10 @@ from transfer_learning_model import TransferLearningLatteArtClassifier
 # Create Flask app
 # Get the absolute path to the frontend build directory
 static_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'build'))
+print(f"🔍 Static folder path: {static_folder}")
+print(f"🔍 Static folder exists: {os.path.exists(static_folder)}")
+if os.path.exists(static_folder):
+    print(f"🔍 Static folder contents: {os.listdir(static_folder)}")
 app = Flask(__name__, static_folder=static_folder, static_url_path='')
 CORS(app)
 
@@ -109,9 +113,15 @@ def status_check():
 @app.route('/<path:path>')
 def serve_react_app(path):
     """Serve the React app for all non-API routes"""
+    print(f"🔍 Serving path: '{path}'")
+    print(f"🔍 Static folder: {app.static_folder}")
+    print(f"🔍 Static folder exists: {os.path.exists(app.static_folder)}")
+    
     if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        print(f"🔍 Serving file: {path}")
         return send_from_directory(app.static_folder, path)
     else:
+        print(f"🔍 Serving index.html")
         return send_from_directory(app.static_folder, 'index.html')
 
 if __name__ == '__main__':
