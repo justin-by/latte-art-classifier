@@ -3,7 +3,6 @@
 README.md
 RENDER_DEPLOYMENT.md
 frontend/node_modules
-frontend/build
 __pycache__
 *.pyc
 *.pyo

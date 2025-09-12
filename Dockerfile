@@ -16,7 +16,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the application code
+# Copy the application code (including pre-built React frontend)
 COPY . .
 
 # Create uploads directory
