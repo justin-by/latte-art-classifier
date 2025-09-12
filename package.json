@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "./start.sh",
+    "build": "cd frontend && npm install && npm run build",
     "backend": "cd backend && python app.py",
     "frontend": "cd frontend && npm start",
     "install-deps": "cd backend && pip install -r requirements.txt && cd ../frontend && npm install",
