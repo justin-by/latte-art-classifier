@@ -31,7 +31,7 @@ class KaggleDatasetManager:
             subprocess.run(["pip", "install", "kaggle"], check=True)
             import kaggle
         
-        # Check for environment variables first (Heroku/production)
+        # Check for environment variables first (Render/production)
         kaggle_username = os.getenv('KAGGLE_USERNAME')
         kaggle_key = os.getenv('KAGGLE_KEY')
         
@@ -69,7 +69,7 @@ class KaggleDatasetManager:
             print("   4. Place it in ~/.kaggle/kaggle.json")
             print("   5. Run: chmod 600 ~/.kaggle/kaggle.json")
             print()
-            print("💡 For Heroku deployment, use environment variables:")
+            print("💡 For Render deployment, use environment variables:")
             print("   KAGGLE_USERNAME=your_username")
             print("   KAGGLE_KEY=your_api_key")
             return False

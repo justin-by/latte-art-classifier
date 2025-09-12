@@ -84,7 +84,7 @@ class TransferLearningLatteArtClassifier:
     def predict(self, image):
         """Predict the class of an image"""
         if self.model is None:
-            # Create a simple fallback model for Heroku deployment
+            # Create a simple fallback model for deployment
             self.create_simple_model()
         
         # Preprocess the image
@@ -104,8 +104,8 @@ class TransferLearningLatteArtClassifier:
         return predicted_class, confidence
     
     def create_simple_model(self):
-        """Create a simple CNN model for Heroku deployment"""
-        print("🏗️  Creating simple CNN model for Heroku...")
+        """Create a simple CNN model for deployment"""
+        print("🏗️  Creating simple CNN model...")
         
         model = models.Sequential([
             layers.Conv2D(32, (3, 3), activation='relu', input_shape=(*self.img_size, 3)),

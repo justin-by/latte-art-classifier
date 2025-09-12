@@ -13,7 +13,7 @@ This project demonstrates a complete machine learning pipeline:
 1. **Data Acquisition**: Automated download from Kaggle using their API
 2. **Model Training**: Transfer learning with MobileNetV2 for high accuracy
 3. **Web Application**: React frontend + Flask backend
-4. **Deployment Ready**: Configured for Heroku deployment
+4. **Deployment Ready**: Configured for Render deployment
 
 ## 🏗️ Architecture
 
@@ -70,7 +70,7 @@ latte-art-classifier/
 │   └── package.json                    # Node.js dependencies
 ├── start.sh                            # Development startup script
 ├── .gitignore                          # Git ignore rules
-└── HEROKU_DEPLOYMENT.md                # Deployment instructions
+└── RENDER_DEPLOYMENT.md                # Deployment instructions
 ```
 
 ## 🚀 Quick Start
@@ -101,7 +101,7 @@ npm install
 ### 4. Download Dataset & Train Model
 ```bash
 cd backend
-# Set up Kaggle API key first (see HEROKU_DEPLOYMENT.md)
+# Set up Kaggle API key first (see RENDER_DEPLOYMENT.md)
 python3 kaggle_dataset_manager.py
 python3 train_kaggle_model.py
 ```
@@ -148,7 +148,7 @@ Visit `http://localhost:3000` to see the application!
 - **Lazy Loading**: Model loads only when needed (faster startup)
 - **Modern UI**: Clean, responsive React interface
 - **API-First**: RESTful endpoints for easy integration
-- **Production Ready**: Configured for Heroku deployment
+- **Production Ready**: Configured for Render deployment
 
 ## 🔧 API Endpoints
 
@@ -179,9 +179,9 @@ Health check endpoint.
 
 ## 🚀 Deployment
 
-See `HEROKU_DEPLOYMENT.md` for detailed deployment instructions to Heroku.
+See `RENDER_DEPLOYMENT.md` for detailed deployment instructions to Render.
 
-### Environment Variables (Heroku)
+### Environment Variables (Render)
 - `KAGGLE_USERNAME` - Your Kaggle username
 - `KAGGLE_KEY` - Your Kaggle API key
 

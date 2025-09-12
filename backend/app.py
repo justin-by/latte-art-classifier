@@ -39,7 +39,7 @@ def get_classifier():
     if classifier is None:
         try:
             print("🔄 Initializing classifier...")
-            # Create classifier (will use simple model for Heroku)
+            # Create classifier (will use trained model for Render)
             classifier = TransferLearningLatteArtClassifier()
             print(f"✅ Classifier initialized with classes: {classifier.class_names}")
         except Exception as e:
