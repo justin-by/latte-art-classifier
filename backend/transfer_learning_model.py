@@ -14,15 +14,27 @@ class TransferLearningLatteArtClassifier:
         self.class_names = ['heart', 'tulip', 'swan', 'rosetta']
         self.model = None
         # Try to load the trained model first, then fallback to simple model
-        try:
-            self.load_model('kaggle_latte_art_model.h5')
-            print("✅ Loaded trained Kaggle model")
-        except:
+        model_paths = [
+            'kaggle_latte_art_model.h5',
+            os.path.join(os.path.dirname(__file__), 'kaggle_latte_art_model.h5'),
+            'transfer_latte_art_model.h5',
+            os.path.join(os.path.dirname(__file__), 'transfer_latte_art_model.h5')
+        ]
+        
+        model_loaded = False
+        for model_path in model_paths:
             try:
-                self.load_model('transfer_latte_art_model.h5')
-                print("✅ Loaded transfer learning model")
-            except:
-                print("⚠️  No trained model found, will use simple model")
+                if os.path.exists(model_path):
+                    self.load_model(model_path)
+                    print(f"✅ Loaded trained model from {model_path}")
+                    model_loaded = True
+                    break
+            except Exception as e:
+                print(f"❌ Failed to load {model_path}: {e}")
+                continue
+        
+        if not model_loaded:
+            print("⚠️  No trained model found, will use simple model")
     
     def create_transfer_model(self):
         """Create a model using transfer learning with MobileNetV2"""
@@ -87,19 +99,30 @@ class TransferLearningLatteArtClassifier:
             # Create a simple fallback model for deployment
             self.create_simple_model()
         
+        print(f"🔍 Model type: {type(self.model)}")
+        print(f"🔍 Model classes: {self.class_names}")
+        
         # Preprocess the image
         processed_image = self.preprocess_image(image)
         if processed_image is None:
+            print("❌ Image preprocessing failed")
             return 'other', 0.5
+        
+        print(f"🔍 Processed image shape: {processed_image.shape}")
         
         # Make prediction
         predictions = self.model.predict(processed_image, verbose=0)
+        print(f"🔍 Raw predictions: {predictions[0]}")
         
         # Get the predicted class and confidence
         predicted_class_idx = np.argmax(predictions[0])
         confidence = float(predictions[0][predicted_class_idx])
         
         predicted_class = self.class_names[predicted_class_idx]
+        
+        print(f"🔍 Predicted class index: {predicted_class_idx}")
+        print(f"🔍 Predicted class: {predicted_class}")
+        print(f"🔍 Confidence: {confidence:.4f}")
         
         return predicted_class, confidence
     

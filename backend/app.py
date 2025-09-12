@@ -16,6 +16,11 @@ from transfer_learning_model import TransferLearningLatteArtClassifier
 react_build_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'build'))
 simple_static_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'static'))
 
+print(f"🔍 React build path: {react_build_path}")
+print(f"🔍 Simple static path: {simple_static_path}")
+print(f"🔍 React build exists: {os.path.exists(react_build_path)}")
+print(f"🔍 Simple static exists: {os.path.exists(simple_static_path)}")
+
 # Use React build if it exists, otherwise use simple static files
 if os.path.exists(react_build_path):
     static_folder = react_build_path
@@ -23,6 +28,8 @@ if os.path.exists(react_build_path):
 else:
     static_folder = simple_static_path
     print("✅ Using simple HTML for frontend")
+
+print(f"🔍 Final static folder: {static_folder}")
 
 app = Flask(__name__, static_folder=static_folder, static_url_path='')
 CORS(app)
