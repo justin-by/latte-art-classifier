@@ -12,7 +12,9 @@ import json
 from transfer_learning_model import TransferLearningLatteArtClassifier
 
 # Create Flask app
-app = Flask(__name__, static_folder='../frontend/build', static_url_path='')
+# Get the absolute path to the frontend build directory
+static_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'build'))
+app = Flask(__name__, static_folder=static_folder, static_url_path='')
 CORS(app)
 
 # Configuration
