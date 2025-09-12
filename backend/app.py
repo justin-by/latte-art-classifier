@@ -39,6 +39,13 @@ def get_classifier():
     if classifier is None:
         try:
             print("🔄 Initializing classifier...")
+            # Check if model file exists
+            model_path = 'kaggle_latte_art_model.h5'
+            print(f"🔍 Checking for model file: {model_path}")
+            print(f"🔍 Model file exists: {os.path.exists(model_path)}")
+            if os.path.exists(model_path):
+                print(f"🔍 Model file size: {os.path.getsize(model_path)} bytes")
+            
             # Create classifier without loading default model
             classifier = TransferLearningLatteArtClassifier()
             # Override the default model loading
@@ -48,6 +55,8 @@ def get_classifier():
             print(f"✅ Model loaded with classes: {classifier.class_names}")
         except Exception as e:
             print(f"❌ Error loading model: {e}")
+            import traceback
+            print(f"❌ Full error: {traceback.format_exc()}")
             classifier = None
     return classifier
 
