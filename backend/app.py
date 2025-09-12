@@ -124,6 +124,27 @@ def status_check():
         'message': 'Server is running' + (' with model loaded' if model_loaded else ' (model will load on first request)')
     })
 
+@app.route('/api/debug', methods=['GET'])
+def debug_info():
+    """Debug endpoint to check file structure"""
+    import os
+    current_dir = os.getcwd()
+    parent_dir = os.path.dirname(current_dir)
+    
+    debug_info = {
+        'current_dir': current_dir,
+        'parent_dir': parent_dir,
+        'static_folder': app.static_folder,
+        'static_folder_exists': os.path.exists(app.static_folder) if app.static_folder else False,
+        'current_dir_contents': os.listdir(current_dir) if os.path.exists(current_dir) else [],
+        'parent_dir_contents': os.listdir(parent_dir) if os.path.exists(parent_dir) else [],
+    }
+    
+    if app.static_folder and os.path.exists(app.static_folder):
+        debug_info['static_folder_contents'] = os.listdir(app.static_folder)
+    
+    return jsonify(debug_info)
+
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve_react_app(path):
