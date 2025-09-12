@@ -21,8 +21,19 @@ print(f"🔍 Simple static path: {simple_static_path}")
 print(f"🔍 React build exists: {os.path.exists(react_build_path)}")
 print(f"🔍 Simple static exists: {os.path.exists(simple_static_path)}")
 
-# Use React build if it exists, otherwise use simple static files
+# List contents of potential React build directory
 if os.path.exists(react_build_path):
+    print(f"🔍 React build contents: {os.listdir(react_build_path)}")
+else:
+    print("🔍 React build directory does not exist")
+
+# List contents of parent directory to see what's available
+parent_dir = os.path.dirname(react_build_path)
+if os.path.exists(parent_dir):
+    print(f"🔍 Parent directory contents: {os.listdir(parent_dir)}")
+
+# Use React build if it exists, otherwise use simple static files
+if os.path.exists(react_build_path) and os.path.exists(os.path.join(react_build_path, 'index.html')):
     static_folder = react_build_path
     print("✅ Using React build for frontend")
 else:

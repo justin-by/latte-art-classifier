@@ -62,5 +62,5 @@ kaggle_data/
 node_modules/
 npm-debug.log*
 
-# React build
-build/
+# React build (but allow frontend/build for deployment)
+# build/
