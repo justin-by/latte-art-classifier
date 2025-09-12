@@ -12,8 +12,18 @@ import json
 from transfer_learning_model import TransferLearningLatteArtClassifier
 
 # Create Flask app
-# Configure static folder for React frontend
-static_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'build'))
+# Configure static folder - try React build first, fallback to simple HTML
+react_build_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'build'))
+simple_static_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'static'))
+
+# Use React build if it exists, otherwise use simple static files
+if os.path.exists(react_build_path):
+    static_folder = react_build_path
+    print("✅ Using React build for frontend")
+else:
+    static_folder = simple_static_path
+    print("✅ Using simple HTML for frontend")
+
 app = Flask(__name__, static_folder=static_folder, static_url_path='')
 CORS(app)
 
