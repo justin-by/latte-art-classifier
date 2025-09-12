@@ -12,12 +12,27 @@ import json
 from transfer_learning_model import TransferLearningLatteArtClassifier
 
 # Create Flask app
-# Get the absolute path to the frontend build directory
-static_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'build'))
-print(f"🔍 Static folder path: {static_folder}")
-print(f"🔍 Static folder exists: {os.path.exists(static_folder)}")
-if os.path.exists(static_folder):
-    print(f"🔍 Static folder contents: {os.listdir(static_folder)}")
+# Try multiple possible locations for the frontend build directory
+possible_paths = [
+    os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'build')),  # Local development
+    os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'build')),  # Heroku build
+    os.path.abspath('frontend/build'),  # Alternative path
+    os.path.abspath('build'),  # Direct build path
+]
+
+static_folder = None
+for path in possible_paths:
+    print(f"🔍 Checking path: {path}")
+    if os.path.exists(path):
+        print(f"✅ Found static folder at: {path}")
+        print(f"🔍 Contents: {os.listdir(path)}")
+        static_folder = path
+        break
+
+if static_folder is None:
+    print("❌ No static folder found!")
+    static_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'build'))
+
 app = Flask(__name__, static_folder=static_folder, static_url_path='')
 CORS(app)
 
