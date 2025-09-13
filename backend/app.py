@@ -16,31 +16,11 @@ from transfer_learning_model import TransferLearningLatteArtClassifier
 react_build_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'build'))
 simple_static_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'static'))
 
-print(f"🔍 React build path: {react_build_path}")
-print(f"🔍 Simple static path: {simple_static_path}")
-print(f"🔍 React build exists: {os.path.exists(react_build_path)}")
-print(f"🔍 Simple static exists: {os.path.exists(simple_static_path)}")
-
-# List contents of potential React build directory
-if os.path.exists(react_build_path):
-    print(f"🔍 React build contents: {os.listdir(react_build_path)}")
-else:
-    print("🔍 React build directory does not exist")
-
-# List contents of parent directory to see what's available
-parent_dir = os.path.dirname(react_build_path)
-if os.path.exists(parent_dir):
-    print(f"🔍 Parent directory contents: {os.listdir(parent_dir)}")
-
 # Use React build if it exists, otherwise use simple static files
 if os.path.exists(react_build_path) and os.path.exists(os.path.join(react_build_path, 'index.html')):
     static_folder = react_build_path
-    print("✅ Using React build for frontend")
 else:
     static_folder = simple_static_path
-    print("✅ Using simple HTML for frontend")
-
-print(f"🔍 Final static folder: {static_folder}")
 
 app = Flask(__name__, static_folder=static_folder, static_url_path='')
 CORS(app)
@@ -139,29 +119,12 @@ def health_check():
     """Health check endpoint"""
     classifier = get_classifier()
     model_status = "loaded" if classifier and classifier.model is not None else "not loaded"
-    model_type = str(type(classifier.model)) if classifier and classifier.model else "none"
-    
-    # Check if model files exist
-    backend_dir = os.path.dirname(__file__)
-    model_files = []
-    if os.path.exists(backend_dir):
-        for file in os.listdir(backend_dir):
-            if file.endswith('.h5'):
-                model_files.append({
-                    'name': file,
-                    'size': os.path.getsize(os.path.join(backend_dir, file)),
-                    'exists': True
-                })
     
     return jsonify({
-        'status': 'healthy', 
+        'status': 'healthy',
         'message': 'Latte Art Classifier is running',
         'model_status': model_status,
-        'model_type': model_type,
-        'classes': classifier.class_names if classifier else [],
-        'model_files': model_files,
-        'backend_dir': backend_dir,
-        'working_dir': os.getcwd()
+        'classes': classifier.class_names if classifier else []
     })
 
 @app.route('/api/status', methods=['GET'])
@@ -175,32 +138,6 @@ def status_check():
         'message': 'Server is running' + (' with model loaded' if model_loaded else ' (model will load on first request)')
     })
 
-@app.route('/api/restart', methods=['GET', 'POST'])
-def restart_classifier():
-    """Force restart the classifier to reload the model"""
-    global classifier
-    classifier = None
-    print("🔄 Forcing classifier restart...")
-    return jsonify({'message': 'Classifier restarted, will reload model on next request'})
-
-@app.route('/api/debug-model', methods=['GET'])
-def debug_model():
-    """Debug endpoint to see model loading details"""
-    global classifier
-    
-    # Force reload the classifier
-    classifier = None
-    print("🔍 Starting fresh model load for debugging...")
-    
-    # Get a fresh classifier instance
-    fresh_classifier = get_classifier()
-    
-    return jsonify({
-        'message': 'Fresh model loaded for debugging',
-        'model_type': str(type(fresh_classifier.model)) if fresh_classifier and fresh_classifier.model else "none",
-        'model_loaded': fresh_classifier is not None and fresh_classifier.model is not None,
-        'class_names': fresh_classifier.class_names if fresh_classifier else []
-    })
 
 
 @app.route('/', defaults={'path': ''})

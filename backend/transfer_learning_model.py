@@ -13,35 +13,27 @@ class TransferLearningLatteArtClassifier:
         self.img_size = img_size
         self.class_names = ['heart', 'tulip', 'swan', 'rosetta']
         self.model = None
-        # Try to load the trained model first, then fallback to simple model
+        # Try to load the trained model
         model_paths = [
             'kaggle_latte_art_model.h5',
             os.path.join(os.path.dirname(__file__), 'kaggle_latte_art_model.h5'),
             'transfer_latte_art_model.h5',
             os.path.join(os.path.dirname(__file__), 'transfer_latte_art_model.h5')
         ]
-        
+
         model_loaded = False
         for model_path in model_paths:
-            print(f"🔍 Checking model path: {model_path}")
-            print(f"🔍 Path exists: {os.path.exists(model_path)}")
-            if os.path.exists(model_path):
-                print(f"🔍 File size: {os.path.getsize(model_path)} bytes")
             try:
                 if os.path.exists(model_path):
                     self.load_model(model_path)
-                    print(f"✅ Loaded trained model from {model_path}")
                     model_loaded = True
                     break
             except Exception as e:
-                print(f"❌ Failed to load {model_path}: {e}")
-                import traceback
-                print(f"❌ Full error: {traceback.format_exc()}")
                 continue
-        
+
         if not model_loaded:
-            print("⚠️  No trained model found, will use simple model")
-            print("🔍 This means the model file is not in the Docker container!")
+            # Create a simple fallback model for deployment
+            self.create_simple_model()
     
     def create_transfer_model(self):
         """Create a model using transfer learning with MobileNetV2"""
@@ -105,32 +97,20 @@ class TransferLearningLatteArtClassifier:
         if self.model is None:
             # Create a simple fallback model for deployment
             self.create_simple_model()
-        
-        print(f"🔍 Model type: {type(self.model)}")
-        print(f"🔍 Model classes: {self.class_names}")
-        
+
         # Preprocess the image
         processed_image = self.preprocess_image(image)
         if processed_image is None:
-            print("❌ Image preprocessing failed")
             return 'other', 0.5
-        
-        print(f"🔍 Processed image shape: {processed_image.shape}")
-        
+
         # Make prediction
         predictions = self.model.predict(processed_image, verbose=0)
-        print(f"🔍 Raw predictions: {predictions[0]}")
-        
+
         # Get the predicted class and confidence
         predicted_class_idx = np.argmax(predictions[0])
         confidence = float(predictions[0][predicted_class_idx])
-        
         predicted_class = self.class_names[predicted_class_idx]
-        
-        print(f"🔍 Predicted class index: {predicted_class_idx}")
-        print(f"🔍 Predicted class: {predicted_class}")
-        print(f"🔍 Confidence: {confidence:.4f}")
-        
+
         return predicted_class, confidence
     
     def create_simple_model(self):
@@ -301,94 +281,20 @@ class TransferLearningLatteArtClassifier:
         """Load a trained model"""
         try:
             if os.path.exists(model_path):
-                print(f"🔍 Attempting to load model from {model_path}")
-                print(f"🔍 TensorFlow version: {tf.__version__}")
-                print(f"🔍 File size: {os.path.getsize(model_path)} bytes")
-                print(f"🔍 File permissions: {oct(os.stat(model_path).st_mode)}")
-                
-                # Try loading with different options
+                # Try loading with different options for compatibility
                 try:
-                    # First try: standard load
                     self.model = tf.keras.models.load_model(model_path)
-                    print(f"✅ Model loaded successfully with standard method")
-                except Exception as e1:
-                    print(f"❌ Standard load failed: {e1}")
+                except Exception:
                     try:
-                        # Second try: load with compile=False
                         self.model = tf.keras.models.load_model(model_path, compile=False)
-                        print(f"✅ Model loaded successfully with compile=False")
-                    except Exception as e2:
-                        print(f"❌ Load with compile=False failed: {e2}")
+                    except Exception:
                         try:
-                            # Third try: load with custom objects
                             self.model = tf.keras.models.load_model(model_path, custom_objects={'MobileNetV2': tf.keras.applications.MobileNetV2})
-                            print(f"✅ Model loaded successfully with custom objects")
-                        except Exception as e3:
-                            print(f"❌ Load with custom objects failed: {e3}")
-                            try:
-                                # Fourth try: load with safe_mode=False
-                                self.model = tf.keras.models.load_model(model_path, safe_mode=False)
-                                print(f"✅ Model loaded successfully with safe_mode=False")
-                            except Exception as e4:
-                                print(f"❌ All load methods failed: {e4}")
-                                print(f"🔍 Model file exists but cannot be loaded - this is a compatibility issue")
-                                
-                                # Try to read the file to check if it's corrupted
-                                try:
-                                    with open(model_path, 'rb') as f:
-                                        header = f.read(8)
-                                        print(f"🔍 File header: {header}")
-                                        if header.startswith(b'PK'):
-                                            print("🔍 File appears to be a valid ZIP/HDF5 file")
-                                        else:
-                                            print("🔍 File header doesn't look like HDF5 - may be corrupted")
-                                except Exception as read_error:
-                                    print(f"🔍 Cannot read file: {read_error}")
-                                
-                                raise e4
-                
-                print(f"📥 Model loaded from {model_path}")
-                print(f"🔍 Loaded model type: {type(self.model)}")
-                print(f"🔍 Model summary:")
-                try:
-                    self.model.summary()
-                except Exception as e:
-                    print(f"🔍 Could not print model summary: {e}")
-                
-                # Check if this is actually a trained model or the fallback
-                if hasattr(self.model, 'layers'):
-                    print(f"🔍 Number of layers: {len(self.model.layers)}")
-                    if len(self.model.layers) > 0:
-                        print(f"🔍 First layer: {self.model.layers[0]}")
-                        print(f"🔍 Last layer: {self.model.layers[-1]}")
-                
-                # Check if this looks like our trained model (should have MobileNetV2)
-                model_str = str(self.model)
-                if 'MobileNetV2' in model_str:
-                    print("🔍 ✅ Model contains MobileNetV2 - this is likely the trained model!")
-                else:
-                    print("🔍 ❌ Model does NOT contain MobileNetV2 - this might be the fallback model")
-                
-                # Check the actual architecture
-                print(f"🔍 Model architecture check:")
-                print(f"🔍 - Is Sequential: {isinstance(self.model, tf.keras.Sequential)}")
-                print(f"🔍 - Is Functional: {isinstance(self.model, tf.keras.Model) and not isinstance(self.model, tf.keras.Sequential)}")
-                
-                # Check if this is the trained model by looking at layer count
-                if hasattr(self.model, 'layers'):
-                    layer_count = len(self.model.layers)
-                    print(f"🔍 - Layer count: {layer_count}")
-                    if layer_count > 10:  # Trained model should have many layers
-                        print("🔍 ✅ This appears to be the trained model (many layers)")
-                    else:
-                        print("🔍 ❌ This appears to be the fallback model (few layers)")
+                        except Exception:
+                            self.model = tf.keras.models.load_model(model_path, safe_mode=False)
             else:
-                print(f"📝 No existing model found at {model_path}")
                 self.model = None
         except Exception as e:
-            print(f"❌ Error loading model: {e}")
-            import traceback
-            print(f"❌ Full traceback: {traceback.format_exc()}")
             self.model = None
 
 def main():

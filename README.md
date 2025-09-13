@@ -57,17 +57,20 @@ latte-art-classifier/
 ├── backend/
 │   ├── app.py                          # Flask application
 │   ├── transfer_learning_model.py      # ML model implementation
-│   ├── kaggle_dataset_manager.py       # Data download utility
-│   ├── train_kaggle_model.py           # Model training script
 │   ├── kaggle_latte_art_model.h5       # Trained model (23MB)
+│   ├── static/                         # Simple HTML fallback
 │   └── requirements.txt                # Python dependencies
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── ImageUpload.js          # File upload component
-│   │   │   └── ResultsDisplay.js       # Results display component
+│   │   │   ├── ResultsDisplay.js       # Results display component
+│   │   │   └── Header.js               # Header component
 │   │   └── App.js                      # Main React component
+│   ├── public/                         # Static assets
 │   └── package.json                    # Node.js dependencies
+├── Dockerfile                          # Docker configuration
+├── render.yaml                         # Render deployment config
 ├── start.sh                            # Development startup script
 ├── .gitignore                          # Git ignore rules
 └── RENDER_DEPLOYMENT.md                # Deployment instructions
@@ -98,12 +101,10 @@ cd frontend
 npm install
 ```
 
-### 4. Download Dataset & Train Model
+### 4. Build Frontend (Optional)
 ```bash
-cd backend
-# Set up Kaggle API key first (see RENDER_DEPLOYMENT.md)
-python3 kaggle_dataset_manager.py
-python3 train_kaggle_model.py
+cd frontend
+npm run build
 ```
 
 ### 5. Start Development Server
@@ -116,18 +117,13 @@ Visit `http://localhost:3000` to see the application!
 
 ## 📈 How It Works
 
-### Step 1: Data Acquisition
-- Uses Kaggle API to download 460 professional latte art images
-- Automatically organizes into 4 categories (115 images each)
-- No manual data collection required
-
-### Step 2: Model Training
-- Employs transfer learning with MobileNetV2
+### Step 1: Pre-trained Model
+- Uses a pre-trained model trained on 460 professional latte art images
+- Model trained with transfer learning using MobileNetV2
 - Pre-trained on ImageNet for robust feature extraction
 - Custom classification head for latte art categories
-- Data augmentation for improved generalization
 
-### Step 3: Classification Pipeline
+### Step 2: Classification Pipeline
 1. User uploads image via React frontend
 2. Flask backend receives image
 3. Model preprocesses image (resize, normalize)
@@ -135,7 +131,7 @@ Visit `http://localhost:3000` to see the application!
 5. Custom classifier predicts category
 6. Returns result with confidence score
 
-### Step 4: User Experience
+### Step 3: User Experience
 - Drag-and-drop image upload
 - Real-time classification results
 - Confidence scores and visual feedback
@@ -143,12 +139,12 @@ Visit `http://localhost:3000` to see the application!
 
 ## 🎯 Key Features
 
-- **Professional Dataset**: 460 high-quality images from Kaggle
+- **Pre-trained Model**: 460 high-quality images from Kaggle dataset
 - **Transfer Learning**: Leverages pre-trained MobileNetV2
 - **Lazy Loading**: Model loads only when needed (faster startup)
-- **Modern UI**: Clean, responsive React interface
+- **Modern UI**: Clean, responsive React interface with animations
 - **API-First**: RESTful endpoints for easy integration
-- **Production Ready**: Configured for Render deployment
+- **Production Ready**: Configured for Render deployment with Docker
 
 ## 🔧 API Endpoints
 
@@ -161,7 +157,7 @@ Classify a latte art image.
 **Response:**
 ```json
 {
-  "art_type": "heart",
+  "predicted_class": "heart",
   "confidence": 0.9919
 }
 ```
@@ -173,7 +169,9 @@ Health check endpoint.
 ```json
 {
   "status": "healthy",
-  "message": "Latte Art Classifier is running"
+  "message": "Latte Art Classifier is running",
+  "model_status": "loaded",
+  "classes": ["heart", "tulip", "swan", "rosetta"]
 }
 ```
 
@@ -182,8 +180,7 @@ Health check endpoint.
 See `RENDER_DEPLOYMENT.md` for detailed deployment instructions to Render.
 
 ### Environment Variables (Render)
-- `KAGGLE_USERNAME` - Your Kaggle username
-- `KAGGLE_KEY` - Your Kaggle API key
+- No environment variables required - model is pre-trained and included
 
 ## 🤝 Contributing
 
