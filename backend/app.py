@@ -175,6 +175,14 @@ def status_check():
         'message': 'Server is running' + (' with model loaded' if model_loaded else ' (model will load on first request)')
     })
 
+@app.route('/api/restart', methods=['POST'])
+def restart_classifier():
+    """Force restart the classifier to reload the model"""
+    global classifier
+    classifier = None
+    print("🔄 Forcing classifier restart...")
+    return jsonify({'message': 'Classifier restarted, will reload model on next request'})
+
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')

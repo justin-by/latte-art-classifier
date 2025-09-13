@@ -322,8 +322,15 @@ class TransferLearningLatteArtClassifier:
                             self.model = tf.keras.models.load_model(model_path, custom_objects={'MobileNetV2': tf.keras.applications.MobileNetV2})
                             print(f"✅ Model loaded successfully with custom objects")
                         except Exception as e3:
-                            print(f"❌ All load methods failed: {e3}")
-                            raise e3
+                            print(f"❌ Load with custom objects failed: {e3}")
+                            try:
+                                # Fourth try: load with safe_mode=False
+                                self.model = tf.keras.models.load_model(model_path, safe_mode=False)
+                                print(f"✅ Model loaded successfully with safe_mode=False")
+                            except Exception as e4:
+                                print(f"❌ All load methods failed: {e4}")
+                                print(f"🔍 Model file exists but cannot be loaded - this is a compatibility issue")
+                                raise e4
                 
                 print(f"📥 Model loaded from {model_path}")
                 print(f"🔍 Loaded model type: {type(self.model)}")
