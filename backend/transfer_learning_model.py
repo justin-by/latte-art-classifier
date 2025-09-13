@@ -301,13 +301,39 @@ class TransferLearningLatteArtClassifier:
         """Load a trained model"""
         try:
             if os.path.exists(model_path):
-                self.model = tf.keras.models.load_model(model_path)
+                print(f"🔍 Attempting to load model from {model_path}")
+                print(f"🔍 TensorFlow version: {tf.__version__}")
+                
+                # Try loading with different options
+                try:
+                    # First try: standard load
+                    self.model = tf.keras.models.load_model(model_path)
+                    print(f"✅ Model loaded successfully with standard method")
+                except Exception as e1:
+                    print(f"❌ Standard load failed: {e1}")
+                    try:
+                        # Second try: load with compile=False
+                        self.model = tf.keras.models.load_model(model_path, compile=False)
+                        print(f"✅ Model loaded successfully with compile=False")
+                    except Exception as e2:
+                        print(f"❌ Load with compile=False failed: {e2}")
+                        try:
+                            # Third try: load with custom objects
+                            self.model = tf.keras.models.load_model(model_path, custom_objects={'MobileNetV2': tf.keras.applications.MobileNetV2})
+                            print(f"✅ Model loaded successfully with custom objects")
+                        except Exception as e3:
+                            print(f"❌ All load methods failed: {e3}")
+                            raise e3
+                
                 print(f"📥 Model loaded from {model_path}")
+                print(f"🔍 Loaded model type: {type(self.model)}")
             else:
                 print(f"📝 No existing model found at {model_path}")
                 self.model = None
         except Exception as e:
             print(f"❌ Error loading model: {e}")
+            import traceback
+            print(f"❌ Full traceback: {traceback.format_exc()}")
             self.model = None
 
 def main():
