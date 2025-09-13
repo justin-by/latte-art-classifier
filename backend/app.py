@@ -175,13 +175,32 @@ def status_check():
         'message': 'Server is running' + (' with model loaded' if model_loaded else ' (model will load on first request)')
     })
 
-@app.route('/api/restart', methods=['POST'])
+@app.route('/api/restart', methods=['GET', 'POST'])
 def restart_classifier():
     """Force restart the classifier to reload the model"""
     global classifier
     classifier = None
     print("🔄 Forcing classifier restart...")
     return jsonify({'message': 'Classifier restarted, will reload model on next request'})
+
+@app.route('/api/debug-model', methods=['GET'])
+def debug_model():
+    """Debug endpoint to see model loading details"""
+    global classifier
+    
+    # Force reload the classifier
+    classifier = None
+    print("🔍 Starting fresh model load for debugging...")
+    
+    # Get a fresh classifier instance
+    fresh_classifier = get_classifier()
+    
+    return jsonify({
+        'message': 'Fresh model loaded for debugging',
+        'model_type': str(type(fresh_classifier.model)) if fresh_classifier and fresh_classifier.model else "none",
+        'model_loaded': fresh_classifier is not None and fresh_classifier.model is not None,
+        'class_names': fresh_classifier.class_names if fresh_classifier else []
+    })
 
 
 @app.route('/', defaults={'path': ''})

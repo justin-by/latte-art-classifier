@@ -303,6 +303,8 @@ class TransferLearningLatteArtClassifier:
             if os.path.exists(model_path):
                 print(f"🔍 Attempting to load model from {model_path}")
                 print(f"🔍 TensorFlow version: {tf.__version__}")
+                print(f"🔍 File size: {os.path.getsize(model_path)} bytes")
+                print(f"🔍 File permissions: {oct(os.stat(model_path).st_mode)}")
                 
                 # Try loading with different options
                 try:
@@ -330,6 +332,19 @@ class TransferLearningLatteArtClassifier:
                             except Exception as e4:
                                 print(f"❌ All load methods failed: {e4}")
                                 print(f"🔍 Model file exists but cannot be loaded - this is a compatibility issue")
+                                
+                                # Try to read the file to check if it's corrupted
+                                try:
+                                    with open(model_path, 'rb') as f:
+                                        header = f.read(8)
+                                        print(f"🔍 File header: {header}")
+                                        if header.startswith(b'PK'):
+                                            print("🔍 File appears to be a valid ZIP/HDF5 file")
+                                        else:
+                                            print("🔍 File header doesn't look like HDF5 - may be corrupted")
+                                except Exception as read_error:
+                                    print(f"🔍 Cannot read file: {read_error}")
+                                
                                 raise e4
                 
                 print(f"📥 Model loaded from {model_path}")
