@@ -141,12 +141,27 @@ def health_check():
     model_status = "loaded" if classifier and classifier.model is not None else "not loaded"
     model_type = str(type(classifier.model)) if classifier and classifier.model else "none"
     
+    # Check if model files exist
+    backend_dir = os.path.dirname(__file__)
+    model_files = []
+    if os.path.exists(backend_dir):
+        for file in os.listdir(backend_dir):
+            if file.endswith('.h5'):
+                model_files.append({
+                    'name': file,
+                    'size': os.path.getsize(os.path.join(backend_dir, file)),
+                    'exists': True
+                })
+    
     return jsonify({
         'status': 'healthy', 
         'message': 'Latte Art Classifier is running',
         'model_status': model_status,
         'model_type': model_type,
-        'classes': classifier.class_names if classifier else []
+        'classes': classifier.class_names if classifier else [],
+        'model_files': model_files,
+        'backend_dir': backend_dir,
+        'working_dir': os.getcwd()
     })
 
 @app.route('/api/status', methods=['GET'])
