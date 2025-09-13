@@ -23,6 +23,10 @@ class TransferLearningLatteArtClassifier:
         
         model_loaded = False
         for model_path in model_paths:
+            print(f"🔍 Checking model path: {model_path}")
+            print(f"🔍 Path exists: {os.path.exists(model_path)}")
+            if os.path.exists(model_path):
+                print(f"🔍 File size: {os.path.getsize(model_path)} bytes")
             try:
                 if os.path.exists(model_path):
                     self.load_model(model_path)
@@ -31,10 +35,13 @@ class TransferLearningLatteArtClassifier:
                     break
             except Exception as e:
                 print(f"❌ Failed to load {model_path}: {e}")
+                import traceback
+                print(f"❌ Full error: {traceback.format_exc()}")
                 continue
         
         if not model_loaded:
             print("⚠️  No trained model found, will use simple model")
+            print("🔍 This means the model file is not in the Docker container!")
     
     def create_transfer_model(self):
         """Create a model using transfer learning with MobileNetV2"""

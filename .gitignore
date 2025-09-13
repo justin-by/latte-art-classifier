@@ -48,8 +48,8 @@ Thumbs.db
 *.log
 server.log
 
-# Model files (optional - you might want to include these)
-*.h5
+# Model files (but include the trained model for deployment)
+# *.h5
 *.pkl
 *.joblib
 
