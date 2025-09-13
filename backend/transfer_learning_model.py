@@ -349,6 +349,39 @@ class TransferLearningLatteArtClassifier:
                 
                 print(f"📥 Model loaded from {model_path}")
                 print(f"🔍 Loaded model type: {type(self.model)}")
+                print(f"🔍 Model summary:")
+                try:
+                    self.model.summary()
+                except Exception as e:
+                    print(f"🔍 Could not print model summary: {e}")
+                
+                # Check if this is actually a trained model or the fallback
+                if hasattr(self.model, 'layers'):
+                    print(f"🔍 Number of layers: {len(self.model.layers)}")
+                    if len(self.model.layers) > 0:
+                        print(f"🔍 First layer: {self.model.layers[0]}")
+                        print(f"🔍 Last layer: {self.model.layers[-1]}")
+                
+                # Check if this looks like our trained model (should have MobileNetV2)
+                model_str = str(self.model)
+                if 'MobileNetV2' in model_str:
+                    print("🔍 ✅ Model contains MobileNetV2 - this is likely the trained model!")
+                else:
+                    print("🔍 ❌ Model does NOT contain MobileNetV2 - this might be the fallback model")
+                
+                # Check the actual architecture
+                print(f"🔍 Model architecture check:")
+                print(f"🔍 - Is Sequential: {isinstance(self.model, tf.keras.Sequential)}")
+                print(f"🔍 - Is Functional: {isinstance(self.model, tf.keras.Model) and not isinstance(self.model, tf.keras.Sequential)}")
+                
+                # Check if this is the trained model by looking at layer count
+                if hasattr(self.model, 'layers'):
+                    layer_count = len(self.model.layers)
+                    print(f"🔍 - Layer count: {layer_count}")
+                    if layer_count > 10:  # Trained model should have many layers
+                        print("🔍 ✅ This appears to be the trained model (many layers)")
+                    else:
+                        print("🔍 ❌ This appears to be the fallback model (few layers)")
             else:
                 print(f"📝 No existing model found at {model_path}")
                 self.model = None
